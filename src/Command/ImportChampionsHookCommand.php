@@ -112,12 +112,11 @@ class ImportChampionsHookCommand extends Command
             foreach ($championDatum as $constant => $stars) {
                 $id = $idsData[$constant];
                 $name = $localeData['champion-' . $id . '-name'];
-                $imageTargetPath = $this->getPortraitImageTargetPath($name);
+                $character = $this->syncChampion($id, $name, $type, $stars);
                 $fs->copy(
                     $this->getPortraitImageSourcePath($cacheDir, $id),
-                    $publicDir . $imageTargetPath
+                    $this->getPortraitImageTargetPath($publicDir, $character->getId())
                 );
-                $this->syncChampion($id, $name, $stars, $type, $imageTargetPath);
             }
         }
 
@@ -130,21 +129,43 @@ class ImportChampionsHookCommand extends Command
      * @param int[]  $stars
      * @param string $type
      */
-    private function syncChampion(string $id, string $name, array $stars, string $type, string $imagePath): void
+    private function syncChampion(string $id, string $name, string $type, array $stars): Character
     {
-        $found = $this->externalCharacterRepository->findBy([
+        $character = $this->syncCharacter($id, $name, $type);
+
+        foreach ($stars as $star) {
+            $found = $this->championRepository->findOneBy(['character' => $character, 'tier' => $star]);
+            if ($found instanceof Champion) {
+                continue;
+            }
+
+            $champion = new Champion();
+            $champion->setCharacter($character);
+            $champion->setTier($star);
+            $champion->setId($character->getId() . '-' . $star);
+            $this->entityManager->persist($champion);
+        }
+
+        $this->entityManager->flush();
+
+        return $character;
+    }
+
+    private function syncCharacter(string $id, string $name, string $type): Character
+    {
+        $found = $this->externalCharacterRepository->findOneBy([
             'source'     => ExternalCharacter::SOURCE_HOOK,
             'externalId' => $id,
         ]);
 
-        if (count($found) > 0) {
-            return;
+        if ($found instanceof ExternalCharacter) {
+            return $found->getCharacter();
         }
 
         $character = new Character();
+        $character->setId(strtolower($this->slugger->slug($name)));
         $character->setType($type);
         $character->setName($name);
-        $character->setPicture($imagePath);
         $this->entityManager->persist($character);
 
         $ExternalCharacter = new ExternalCharacter();
@@ -153,14 +174,9 @@ class ImportChampionsHookCommand extends Command
         $ExternalCharacter->setExternalId($id);
         $this->entityManager->persist($ExternalCharacter);
 
-        foreach ($stars as $star) {
-            $champion = new Champion();
-            $champion->setCharacter($character);
-            $champion->setTier($star);
-            $this->entityManager->persist($champion);
-        }
-
         $this->entityManager->flush();
+
+        return $character;
     }
 
     private function checkout(string $dir): void
@@ -210,10 +226,8 @@ class ImportChampionsHookCommand extends Command
         return $dir . '/champions/src/images/champions/portrait_' . $id . '.png';
     }
 
-    private function getPortraitImageTargetPath(string $name): string
+    private function getPortraitImageTargetPath(string $dir, string $id): string
     {
-        $slug = strtolower($this->slugger->slug($name));
-
-        return '/images/portraits/' . $slug . '.png';
+        return $dir . '/images/portrait/' . $id . '.png';
     }
 }

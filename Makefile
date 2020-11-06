@@ -1,7 +1,7 @@
 test: deptrac schema phpunit phpstan
 
 phpstan:
-	vendor/bin/phpstan analyse src tests --level=5 --memory-limit=128M
+	vendor/bin/phpstan analyse src tests --level=5 --memory-limit=512M
 
 phpunit: reset-test
 	vendor/bin/phpunit

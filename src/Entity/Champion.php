@@ -24,23 +24,24 @@ class Champion
     private $tier;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $picture;
-
-    /**
      * @ORM\ManyToOne(targetEntity="Character", fetch="EAGER")
      */
     private $character;
 
     public function __construct()
     {
-        $this->id = Uuid::v4();
     }
 
     public function getId(): ?string
     {
         return $this->id;
+    }
+
+    public function setId($id): self
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     public function getTier(): ?int
@@ -51,18 +52,6 @@ class Champion
     public function setTier(int $tier): self
     {
         $this->tier = $tier;
-
-        return $this;
-    }
-
-    public function getPicture(): ?string
-    {
-        return $this->picture;
-    }
-
-    public function setPicture(?string $picture): self
-    {
-        $this->picture = $picture;
 
         return $this;
     }
