@@ -1,0 +1,46 @@
+paths:
+  - ./src
+exclude_files:
+  - .*test.*
+layers:
+  - name: Controller
+    collectors:
+      - type: directory
+        regex: ./src/Controller/.*
+  - name: Command
+    collectors:
+      - type: directory
+        regex: ./src/Command/.*
+  - name: Repository
+    collectors:
+      - type: directory
+        regex: ./src/Repository/.*
+  - name: Service
+    collectors:
+      - type: directory
+        regex: ./src/Service/.*
+  - name: Entity
+    collectors:
+      - type: directory
+        regex: ./src/Entity/.*
+  - name: Form
+    collectors:
+      - type: directory
+        regex: ./src/Form/.*
+ruleset:
+  Controller:
+    - Entity
+    - Form
+    - Service
+  Command:
+    - Repository
+    - Entity
+    - Form
+    - Service
+  Service:
+    - Entity
+    - Repository
+  Repository:
+    - Entity
+  Entity:
+  Form:
