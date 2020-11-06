@@ -31,16 +31,23 @@ class PlayerService
     private RosterRepository $rosterRepository;
 
     /**
+     * @var ChallengerRatingCalculator
+     */
+    private ChallengerRatingCalculator $challengerRatingCalculator;
+
+    /**
      * PlayerService constructor.
      */
     public function __construct(
         EntityManagerInterface $entityManager,
         PlayerRepository $playerRepository,
-        RosterRepository $rosterRepository
+        RosterRepository $rosterRepository,
+        ChallengerRatingCalculator $challengerRatingCalculator
     ) {
         $this->entityManager = $entityManager;
         $this->playerRepository = $playerRepository;
         $this->rosterRepository = $rosterRepository;
+        $this->challengerRatingCalculator = $challengerRatingCalculator;
     }
 
     /**
@@ -78,7 +85,7 @@ class PlayerService
 
             $list[$champion->getId()] = [
                 'champion' => $champion,
-                'roster' => $roster
+                'roster'   => $roster,
             ];
         }
 
@@ -107,6 +114,7 @@ class PlayerService
         $roster->setChampion($champion);
         $roster->setRank($rank);
         $roster->setSignature($signature);
+        $roster->setRating($this->challengerRatingCalculator->getChallengerRating($roster));
 
         $this->entityManager->persist($roster);
 

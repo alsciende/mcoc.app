@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Battlegroup;
 use App\Entity\Roster;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -39,18 +40,31 @@ class RosterRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findOneByIds(string $championId, string $playerId)
-    {
-        return $this
+    public function findByBattlegroupAndRating(
+        Battlegroup $battlegroup,
+        int $minRating = null,
+        int $maxRating = null
+    ) {
+        $queryBuilder = $this
             ->createQueryBuilder('r')
             ->join('r.champion', 'c')
+            ->join('c.character', 'x')
             ->join('r.player', 'p')
-            ->andWhere('c.id = :championId')
-            ->andWhere('p.id = :playerId')
-            ->setParameter('championId', $championId)
-            ->setParameter('playerId', $playerId)
-            ->getQuery()
-            ->getOneOrNullResult()
-            ;
+            ->join('p.member', 'm')
+            ->where('m.battlegroup=:battlegroup')
+            ->setParameter('battlegroup', $battlegroup)
+            ->addOrderBy('p.name', 'ASC')
+            ->addOrderBy('r.rating', 'DESC')
+            ->addOrderBy('x.name', 'ASC');
+
+        if ($minRating !== null) {
+            $queryBuilder->andWhere('r.rating >= :min')->setParameter('min', $minRating);
+        }
+
+        if ($maxRating !== null) {
+            $queryBuilder->andWhere('r.rating <= :max')->setParameter('max', $maxRating);
+        }
+
+        return $queryBuilder->getQuery()->getResult();
     }
 }

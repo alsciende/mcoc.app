@@ -40,11 +40,17 @@ class Alliance
      */
     private $candidates;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Battlegroup::class, mappedBy="alliance")
+     */
+    private $battlegroups;
+
     public function __construct()
     {
         $this->id = Uuid::v4();
         $this->members = new ArrayCollection();
         $this->candidates = new ArrayCollection();
+        $this->battlegroups = new ArrayCollection();
     }
 
     public function getId(): ?string
@@ -132,6 +138,36 @@ class Alliance
             // set the owning side to null (unless already changed)
             if ($candidate->getAlliance() === $this) {
                 $candidate->setAlliance(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Battlegroup[]
+     */
+    public function getBattlegroups(): Collection
+    {
+        return $this->battlegroups;
+    }
+
+    public function addBattlegroup(Battlegroup $battlegroup): self
+    {
+        if (!$this->battlegroups->contains($battlegroup)) {
+            $this->battlegroups[] = $battlegroup;
+            $battlegroup->setAlliance($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBattlegroup(Battlegroup $battlegroup): self
+    {
+        if ($this->battlegroups->removeElement($battlegroup)) {
+            // set the owning side to null (unless already changed)
+            if ($battlegroup->getAlliance() === $this) {
+                $battlegroup->setAlliance(null);
             }
         }
 

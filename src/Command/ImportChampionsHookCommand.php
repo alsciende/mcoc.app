@@ -9,6 +9,7 @@ use App\Import\Hook\ChampionDataExtractor;
 use App\Repository\ChampionRepository;
 use App\Repository\ExternalCharacterRepository;
 use App\Repository\CharacterRepository;
+use App\Service\ChallengerRatingCalculator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -69,6 +70,7 @@ class ImportChampionsHookCommand extends Command
         ChampionRepository $championRepository,
         EntityManagerInterface $entityManager,
         SluggerInterface $slugger
+
     ) {
         parent::__construct();
         $this->containerBag = $containerBag;
@@ -140,9 +142,9 @@ class ImportChampionsHookCommand extends Command
             }
 
             $champion = new Champion();
+            $champion->setId($character->getId() . '-' . $star);
             $champion->setCharacter($character);
             $champion->setTier($star);
-            $champion->setId($character->getId() . '-' . $star);
             $this->entityManager->persist($champion);
         }
 
@@ -228,6 +230,6 @@ class ImportChampionsHookCommand extends Command
 
     private function getPortraitImageTargetPath(string $dir, string $id): string
     {
-        return $dir . '/images/portrait/' . $id . '.png';
+        return $dir . '/images/portraits/' . $id . '.png';
     }
 }

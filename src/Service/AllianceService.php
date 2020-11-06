@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Alliance;
+use App\Entity\Battlegroup;
 use App\Entity\Candidate;
 use App\Entity\Member;
 use App\Entity\Player;
@@ -74,6 +75,21 @@ class AllianceService
         $alliance->setName($name);
         $this->entityManager->persist($alliance);
 
+        $bg1 = new Battlegroup();
+        $bg1->setAlliance($alliance);
+        $bg1->setPosition(1);
+        $this->entityManager->persist($bg1);
+
+        $bg2 = new Battlegroup();
+        $bg2->setAlliance($alliance);
+        $bg2->setPosition(2);
+        $this->entityManager->persist($bg2);
+
+        $bg3 = new Battlegroup();
+        $bg3->setAlliance($alliance);
+        $bg3->setPosition(3);
+        $this->entityManager->persist($bg3);
+
         $member = new Member();
         $member->setAlliance($alliance);
         $member->setPlayer($player);
@@ -104,6 +120,14 @@ class AllianceService
 
         foreach ($alliance->getCandidates() as $candidate) {
             $this->entityManager->remove($candidate);
+        }
+
+        foreach ($alliance->getBattlegroups() as $battlegroup) {
+            foreach ($battlegroup->getDefenders() as $defender) {
+                $this->entityManager->remove($defender);
+            }
+            
+            $this->entityManager->remove($battlegroup);
         }
 
         $this->entityManager->remove($alliance);
@@ -225,20 +249,14 @@ class AllianceService
     }
 
     /**
-     * Return the list of all Members, optionally filtered for a battlegroup
+     * Return the list of all Members
      *
-     * @param int|null $battlegroup
+     * @param Alliance $alliance
      * @return Member[]
      */
-    public function listMembers(Alliance $alliance, int $battlegroup = null): array
+    public function listMembers(Alliance $alliance): array
     {
-        $criteria = ['alliance' => $alliance];
-
-        if ($battlegroup !== null) {
-            $criteria['battlegroup'] = $battlegroup;
-        }
-
-        return $this->memberRepository->findBy($criteria, ['role' => 'ASC']);
+        return $this->memberRepository->findBy(['alliance' => $alliance], ['role' => 'ASC']);
     }
 
     /**
@@ -253,6 +271,12 @@ class AllianceService
             throw new LeaderCannotLeaveException($member->getId());
         }
 
+        foreach ($member->getPlayer()->getRosters() as $roster) {
+            foreach ($roster->getDefenders() as $defender) {
+                $this->entityManager->remove($defender);
+            }
+        }
+        
         $this->entityManager->remove($member);
         $this->entityManager->flush();
     }

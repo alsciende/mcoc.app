@@ -6,6 +6,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 
 /**
+ * This is a Player that applies to enter an Alliance
+ *
  * @ORM\Entity(repositoryClass=\App\Repository\CandidateRepository::class)
  */
 class Candidate

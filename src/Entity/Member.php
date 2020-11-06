@@ -6,6 +6,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 
 /**
+ * This is a Player in an Alliance
+ *
  * @ORM\Entity(repositoryClass=\App\Repository\MemberRepository::class)
  */
 class Member
@@ -38,7 +40,7 @@ class Member
     private $role;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\ManyToOne(targetEntity=Battlegroup::class, inversedBy="members")
      */
     private $battlegroup;
 
@@ -91,12 +93,12 @@ class Member
         return $this;
     }
 
-    public function getBattlegroup(): ?int
+    public function getBattlegroup(): ?Battlegroup
     {
         return $this->battlegroup;
     }
 
-    public function setBattlegroup(?int $battlegroup): self
+    public function setBattlegroup(?Battlegroup $battlegroup): self
     {
         $this->battlegroup = $battlegroup;
 
