@@ -11,6 +11,7 @@ use Symfony\Component\Uid\Uuid;
  * This is a Champion in a Player's Collection
  *
  * @ORM\Entity(repositoryClass=\App\Repository\RosterRepository::class)
+ * @ORM\Table(uniqueConstraints={@ORM\UniqueConstraint(columns={"player_id", "champion_id"})})
  */
 class Roster
 {

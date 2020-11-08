@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Scenario;
+namespace Scenario;
 
 use App\Entity\Alliance;
 use App\Entity\Candidate;
@@ -10,7 +10,6 @@ use App\Exception\CannotDestroyNonemptyAllianceException;
 use App\Exception\CannotPromoteLeaderException;
 use App\Exception\LeaderCannotLeaveException;
 use App\Service\AllianceService;
-use Symfony\Component\Uid\Uuid;
 
 class AllianceServiceTest extends AbstractScenarioTest
 {
@@ -25,7 +24,7 @@ class AllianceServiceTest extends AbstractScenarioTest
     public function testAllianceScenario1()
     {
         $player1 = self::createPlayer();
-        $alliance = $this->service->createAlliance($player1, '2', Uuid::v4());
+        $alliance = $this->service->createAlliance($player1, 'ttas1', __METHOD__);
         $this->assertInstanceOf(Alliance::class, $alliance);
 
         $member1 = $this->service->findMember($player1, $alliance);

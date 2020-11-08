@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Tests\Scenario;
+namespace Scenario;
 
+use App\Entity\Champion;
+use App\Entity\Character;
 use App\Entity\Player;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Registry;
@@ -48,5 +50,38 @@ abstract class AbstractScenarioTest extends KernelTestCase
         self::getDoctrine()->getManagerForClass(Player::class)->persist($player);
 
         return $player;
+    }
+
+    protected static function createCharacter(): Character
+    {
+        $character = new Character();
+        $character->setId(Uuid::v4());
+        $character->setName(Uuid::v4());
+        $character->setType(Character::TYPE_COSMIC);
+
+        self::getDoctrine()->getManagerForClass(Character::class)->persist($character);
+
+        return $character;
+    }
+
+    protected static function createChampion(Character $character = null, int $tier = 6): Champion
+    {
+        if ($character === null) {
+            $character = self::createCharacter();
+        }
+
+        $champion = new Champion();
+        $champion->setId(Uuid::v4());
+        $champion->setCharacter($character);
+        $champion->setTier($tier);
+
+        self::getDoctrine()->getManagerForClass(Champion::class)->persist($champion);
+
+        return $champion;
+    }
+
+    protected static function createRoster()
+    {
+        
     }
 }

@@ -4,9 +4,11 @@ namespace App\Service;
 
 use App\Entity\Battlegroup;
 use App\Entity\Defender;
+use App\Entity\Member;
 use App\Entity\Roster;
 use App\Exception\AllianceMismatchException;
 use App\Repository\DefenderRepository;
+use App\Repository\MemberRepository;
 use App\Repository\RosterRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -15,6 +17,11 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 class BattlegroupService
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    private EntityManagerInterface $entityManager;
+
     /**
      * @var RosterRepository
      */
@@ -26,21 +33,48 @@ class BattlegroupService
     private DefenderRepository $defenderRepository;
 
     /**
-     * @var EntityManagerInterface
+     * @var MemberRepository
      */
-    private EntityManagerInterface $entityManager;
+    private MemberRepository $memberRepository;
 
     /**
      * BattlegroupService constructor.
      */
     public function __construct(
+        EntityManagerInterface $entityManager,
         RosterRepository $rosterRepository,
         DefenderRepository $defenderRepository,
-        EntityManagerInterface $entityManager
+        MemberRepository $memberRepository
     ) {
+        $this->entityManager = $entityManager;
         $this->rosterRepository = $rosterRepository;
         $this->defenderRepository = $defenderRepository;
-        $this->entityManager = $entityManager;
+        $this->memberRepository = $memberRepository;
+    }
+
+    /**
+     * A Member can have Defenders in more than one Battlegroup, but his Battlegroup is the active one
+     *
+     * @param Battlegroup $battlegroup
+     * @param Member      $member
+     */
+    public function assignMember(Battlegroup $battlegroup, Member $member): void
+    {
+        if ($battlegroup->getAlliance()->getId() !== $member->getAlliance()->getId()) {
+            throw new AllianceMismatchException();
+        }
+
+        $member->setBattlegroup($battlegroup);
+        $this->entityManager->flush();
+    }
+
+    /**
+     * @param Battlegroup $battlegroup
+     * @return Member[]
+     */
+    public function listMembers(Battlegroup $battlegroup): array
+    {
+        return $this->memberRepository->findBy(['battlegroup' => $battlegroup]);
     }
 
     /**
@@ -60,6 +94,7 @@ class BattlegroupService
 
         $this->entityManager->persist($defender);
         $this->entityManager->flush();
+        $this->entityManager->refresh($defender);
 
         return $defender;
     }
@@ -98,8 +133,7 @@ class BattlegroupService
             ->join('d.roster', 'r')
             ->join('r.champion', 'c')
             ->join('c.character', 'x')
-            ->join('r.player', 'p')
-            ->andWhere('p.battlegroup=:battlegroup')
+            ->andWhere('d.battlegroup=:battlegroup')
             ->setParameter('battlegroup', $battlegroup);
 
         $result = $queryBuilder->getQuery()->getOneOrNullResult();

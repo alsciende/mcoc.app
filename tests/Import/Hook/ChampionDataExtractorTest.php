@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Import\Hook;
+namespace Import\Hook;
 
 use App\Import\Hook\ChampionDataExtractor;
 use PHPUnit\Framework\TestCase;

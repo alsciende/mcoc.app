@@ -99,6 +99,7 @@ class AllianceService
         $player->setMember($member);
 
         $this->entityManager->flush();
+        $this->entityManager->refresh($alliance);
 
         return $alliance;
     }
@@ -107,7 +108,7 @@ class AllianceService
      * @param Alliance $alliance
      * @throws CannotDestroyNonemptyAllianceException
      */
-    public function destroyAlliance(Alliance $alliance)
+    public function destroyAlliance(Alliance $alliance): void
     {
         if (count($alliance->getMembers()) > 1) {
             throw new CannotDestroyNonemptyAllianceException($alliance->getId());
@@ -181,6 +182,7 @@ class AllianceService
 
         $this->entityManager->persist($candidate);
         $this->entityManager->flush();
+        $this->entityManager->refresh($candidate);
 
         return $candidate;
     }
@@ -232,6 +234,7 @@ class AllianceService
         $this->entityManager->remove($candidate);
 
         $this->entityManager->flush();
+        $this->entityManager->refresh($member);
 
         return $member;
     }
@@ -265,7 +268,7 @@ class AllianceService
      * @param Member $member
      * @throws LeaderCannotLeaveException
      */
-    public function removeMember(Member $member)
+    public function removeMember(Member $member): void
     {
         if ($member->getRole() === Member::ROLE_LEADER) {
             throw new LeaderCannotLeaveException($member->getId());
