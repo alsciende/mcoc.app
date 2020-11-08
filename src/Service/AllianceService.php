@@ -302,7 +302,7 @@ class AllianceService
     }
 
     /**
-     * Return the Member of a Player in an Alliance, if found
+     * Return the Member of a Player in an Alliance, if found. That should be $player->getMember() anyway.
      *
      * @param Player   $player
      * @param Alliance $alliance
