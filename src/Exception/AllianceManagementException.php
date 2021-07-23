@@ -2,7 +2,7 @@
 
 namespace App\Exception;
 
-class AllianceManagementException extends \RuntimeException
+abstract class AllianceManagementException extends \RuntimeException
 {
 
 }

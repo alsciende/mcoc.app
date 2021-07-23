@@ -122,6 +122,8 @@ class ImportChampionsHookCommand extends Command
             }
         }
 
+        $io->success("Done");
+
         return Command::SUCCESS;
     }
 
