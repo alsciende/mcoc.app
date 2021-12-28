@@ -189,7 +189,7 @@ class ImportChampionsHookCommand extends Command
             shell_exec('cd ' . $dir . ' && git clone https://github.com/hook/champions');
         }
 
-        shell_exec('cd ' . $dir . '/champions && git checkout --force master');
+        shell_exec('cd ' . $dir . '/champions && git checkout --force master && git pull');
     }
 
     private function readIdsChampionData(string $dir): string
